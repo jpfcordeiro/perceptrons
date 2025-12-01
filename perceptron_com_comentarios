@@ -1,0 +1,126 @@
+import numpy as np
+
+# ======================================================================
+# 1. Função de ativação (degrau bipolar)
+#    - Recebe a soma ponderada (sinal de entrada).
+#    - Retorna +1 se a soma for >= 0.
+#    - Retorna -1 se a soma for negativa.
+#    Isso transforma um valor contínuo em uma classificação binária.
+# ======================================================================
+def step_function(x):
+    return 1 if x >= 0 else -1
+
+
+# ======================================================================
+# 2. Base de dados (entradas X e saídas desejadas y)
+#    - Cada linha de X representa um exemplo.
+#    - Cada posição em y representa a saída correta daquele exemplo.
+#    - Aqui usamos entradas simples só para demonstrar o treino.
+# ======================================================================
+X = np.array([
+    [0, 0, 1],
+    [1, 1, 0]
+])
+
+# Saídas desejadas usando codificação bipolar: -1 ou +1
+y = np.array([-1, 1])
+
+
+# ======================================================================
+# 3. Hiperparâmetros do treinamento
+#    - lr (learning rate): controla o tamanho do ajuste nos pesos.
+#    - n_epochs: quantas vezes toda a base será apresentada ao perceptron.
+# ======================================================================
+lr = 0.4
+n_epochs = 10
+
+
+# ======================================================================
+# 4. Pesos iniciais e bias
+#    - Pesos: multiplicam as entradas.
+#    - Bias: deslocamento da fronteira de decisão.
+#    - Aqui definimos valores fixos para facilitar o acompanhamento.
+# ======================================================================
+pesos = np.array([0.4, -0.6, 0.6], dtype=float)
+bias = 0.5
+
+print("Pesos iniciais:", pesos, "Bias inicial:", bias)
+
+
+# ======================================================================
+# 5. Processo de treinamento do Perceptron
+#    Para cada época:
+#       Para cada exemplo:
+#           1. Calcula soma ponderada
+#           2. Ativa com função degrau
+#           3. Compara previsão com saída correta → erro
+#           4. Ajusta pesos e bias com base no erro
+#
+#    Regra de atualização: 
+#    w_novo = w_antigo + (lr * erro * x)
+#    bias_novo = bias_antigo + (lr * erro)
+# ======================================================================
+for epoca in range(n_epochs):
+    print(f"\nÉpoca {epoca+1}")
+    
+    for x_i, y_i in zip(X, y):
+
+        # 1. Soma ponderada (produto escalar + bias)
+        soma = np.dot(pesos, x_i) + bias
+        
+        # 2. Aplicação da função de ativação
+        y_pred = step_function(soma)
+        
+        # 3. Cálculo do erro (diferença entre saída correta e prevista)
+        erro = y_i - y_pred
+        
+        # 4. Atualização dos pesos e do bias
+        pesos += lr * erro * x_i   # ajuste proporcional ao erro
+        bias  += lr * erro         # bias também aprende com o erro
+        
+        # Impressão dos detalhes da iteração
+        print(f"Entrada: {x_i}, Esperado: {y_i}, Previsto: {y_pred}, Erro: {erro}")
+        print("Pesos atualizados:", pesos, "Bias atualizado:", bias)
+
+
+print("\nPesos finais após o treinamento:", pesos, "Bias final:", bias)
+
+
+# ======================================================================
+# 6. Teste do Perceptron em novos exemplos
+#    - Agora usamos os pesos treinados para classificar novas entradas.
+#    - Comparamos a previsão com a saída esperada para medir acurácia.
+# ======================================================================
+X_teste = np.array([
+    [1, 1, 1],
+    [0, 0, 0],
+    [1, 0, 0],
+    [0, 1, 1]
+])
+
+Y_teste = np.array([-1, 1, 1, -1])
+
+print("\n--- Predições nos exemplos de teste ---")
+
+acertou = 0
+total = 0
+
+for x_i, y_i in zip(X_teste, Y_teste):
+    
+    # Soma ponderada usando os pesos treinados
+    soma = np.dot(pesos, x_i) + bias
+    
+    # Previsão
+    y_pred = step_function(soma)
+    
+    print(f"Entrada: {x_i} → Previsão: {y_pred} (Esperado: {y_i})")
+    
+    # Conta acertos
+    if y_pred == y_i:
+        acertou += 1
+    
+    total += 1
+
+# Calcular acurácia
+acuracia = acertou / total
+print(f"\nAcurácia no conjunto de teste: {acuracia:.2f}")
